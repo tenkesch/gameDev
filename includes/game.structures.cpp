@@ -8,42 +8,55 @@
 #define DEFAULT_HEALTH 100
 #define DEFAULT_SIZE 100 // in percents
 
-struct Unit {
-    char name_[NAME_LENGHT_CAP];
+typedef struct Position {
+    int X_;
+    int Y_;
+} Position;
 
-  private:
+typedef struct Stats {
     bool isAlive_ = true;
     int damage_ = DEFAULT_DAMAGE;
     int maxHP_ = DEFAULT_HEALTH;
     int currentHP_ = DEFAULT_HEALTH;
     int size_ = DEFAULT_SIZE;
+} Stats;
+
+struct Unit {
+    char name_[NAME_LENGHT_CAP];
+
+  private:
+    Position pos = {.X_ = 0, .Y_ = 0};
+    Stats stat;
 
   public:
     int isAlive() {
-        if (currentHP_ <= 0) {
+        if (stat.currentHP_ <= 0) {
             die();
             return false;
         }
 
         return true;
     }
-    int currentHP() { return currentHP_; }
-    int getDamage() { return damage_; }
-    int getSize() { return size_; }
+    int currentHP() { return stat.currentHP_; }
+    int getDamage() { return stat.damage_; }
+    int getSize() { return stat.size_; }
 
-    void setDamage(int value) { damage_ = value; }
-    void setMaxHP(int value) { currentHP_ = maxHP_ = value; }
-    void setSize(int value) { size_ = value; }
-    void die() { isAlive_ = false; }
+    void moveX(int value) { pos.X_ += value; }
+    void moveY(int value) { pos.Y_ += value; }
+    void setDamage(int value) { stat.damage_ = value; }
+    void setMaxHP(int value) { stat.currentHP_ = stat.maxHP_ = value; }
+    void setSize(int value) { stat.size_ = value; }
+    void die() { stat.isAlive_ = false; }
     void setCurrentHP(int value) {
-        currentHP_ = value;
-        if (currentHP_ <= 0)
+        stat.currentHP_ = value;
+        if (stat.currentHP_ <= 0)
             die();
     }
 
-    void recieveDamage(int value) { setCurrentHP(currentHP_ -= value); }
+    void recieveDamage(int value) { setCurrentHP(stat.currentHP_ -= value); }
 };
 
+// frees up memory Unit was holding
 void killUnit(std::unique_ptr<Unit> &unitPtr) { unitPtr.reset(); }
 
 std::unique_ptr<Unit> makeUnit(char name[NAME_LENGHT_CAP], int damage,
@@ -58,16 +71,3 @@ std::unique_ptr<Unit> makeUnit(char name[NAME_LENGHT_CAP], int damage,
 
     return newUnit;
 }
-
-// struct Unit *createUnit(char name[NAME_LENGHT_CAP]) {
-//     struct Unit newCreature;
-
-//     std::strncpy(newCreature.name_, name, NAME_LENGHT_CAP - 1);
-//     newCreature.name_[NAME_LENGHT_CAP - 1] = '\0';
-//     newCreature.setDamage(DEFAULT_DAMAGE);
-//     newCreature.setHealth(DEFAULT_HEALTH);
-//     newCreature.setSize(DEFAULT_SIZE);
-
-//     std ::cout << "New Mob has been created : '" << name << "'" << std::endl;
-//     return &newCreature;
-// }
